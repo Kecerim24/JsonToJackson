@@ -1,0 +1,17 @@
+{
+    "name": "John",
+    "birthDate": "2000-01-01",
+    "isStudent": true,
+    "grades": [85, 90, 78, 92],
+    "address": {
+        "city": "New York", 
+        "street": "123 Main St",
+        "zip": "12345"
+    },
+    "phoneNumbers": [
+        {
+            "type": "home",
+            "number": "123-456-7890"
+        }
+    ]
+}
