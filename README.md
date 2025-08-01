@@ -1,4 +1,4 @@
-*Json to Java class with Jackson properties*
+**Json to Java class with Jackson properties**
 
 example in test folder made was made like this:
 ```bash
