@@ -1,6 +1,9 @@
 package com.example;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 /**
@@ -11,7 +14,13 @@ public class Test {
     private String name;
 
     @JsonProperty(access = JsonProperty.Access.AUTO, value = "birthDate")
-    private String birthDate;
+    private LocalDate birthDate;
+
+    @JsonProperty(access = JsonProperty.Access.AUTO, value = "birthTime")
+    private LocalTime birthTime;
+
+    @JsonProperty(access = JsonProperty.Access.AUTO, value = "birthDateTime")
+    private LocalDateTime birthDateTime;
 
     @JsonProperty(access = JsonProperty.Access.AUTO, value = "isStudent")
     private Boolean isStudent;
@@ -33,12 +42,28 @@ public class Test {
         this.name = name;
     }
 
-    public String getBirthdate() {
+    public LocalDate getBirthdate() {
         return birthDate;
     }
 
-    public void setBirthdate(String birthDate) {
+    public void setBirthdate(LocalDate birthDate) {
         this.birthDate = birthDate;
+    }
+
+    public LocalTime getBirthtime() {
+        return birthTime;
+    }
+
+    public void setBirthtime(LocalTime birthTime) {
+        this.birthTime = birthTime;
+    }
+
+    public LocalDateTime getBirthdatetime() {
+        return birthDateTime;
+    }
+
+    public void setBirthdatetime(LocalDateTime birthDateTime) {
+        this.birthDateTime = birthDateTime;
     }
 
     public Boolean getIsstudent() {

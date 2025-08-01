@@ -2,6 +2,7 @@ import getopt
 import sys
 import json
 import os
+from datetime import datetime, date, time
 from typing import Dict, Any, Set, List
 
 def to_camel_case(snake_str: str) -> str:
@@ -14,10 +15,37 @@ def to_pascal_case(snake_str: str) -> str:
     components = snake_str.split('_')
     return ''.join(word.capitalize() for word in components)
 
+def date_valid(value: str) -> bool:
+    try:
+        date.fromisoformat(value)
+    except:
+        return False
+    return True
+
+def datetime_valid(value: str) -> bool:
+    try:
+        datetime.fromisoformat(value)
+    except:
+        return False
+    return True
+
+def time_valid(value: str) -> bool:
+    try:
+        time.fromisoformat(value)
+    except:
+        return False
+    return True
+
 def get_java_type(value: Any, field_name: str = "") -> str:
     """Determine Java type from Python value"""
     if value is None:
         return "String"  # Default for null values
+    elif date_valid(value):
+        return "LocalDate"
+    elif time_valid(value):
+        return "LocalTime"
+    elif datetime_valid(value):
+        return "LocalDateTime"
     elif isinstance(value, bool):
         return "Boolean"
     elif isinstance(value, int):
@@ -89,7 +117,7 @@ def analyze_json_structure(data: Any, class_name: str = "Root") -> Dict[str, Dic
     
     return classes
 
-def generate_java_class(class_name: str, fields: Dict, package_name: str = "com.example.model", access_modifier: str = "READ_WRITE", generate_getters: bool = False, generate_setters: bool = False) -> str:
+def generate_java_class(class_name: str, fields: Dict, access_modifier: str, package_name: str = "com.example.model", generate_getters: bool = False, generate_setters: bool = False) -> str:
     """Generate Java class code"""
     imports = set()
     
@@ -98,9 +126,11 @@ def generate_java_class(class_name: str, fields: Dict, package_name: str = "com.
         field_type = field_info['type']
         if field_type.startswith('List<'):
             imports.add("import java.util.List;")
-        if 'LocalDate' in field_type:
+        if 'LocalDate' == field_type:
             imports.add("import java.time.LocalDate;")
-        if 'LocalDateTime' in field_type:
+        if 'LocalTime' == field_type:
+            imports.add("import java.time.LocalTime;")
+        if 'LocalDateTime' == field_type:
             imports.add("import java.time.LocalDateTime;")
     
     # Add Jackson annotations import
@@ -124,7 +154,10 @@ def generate_java_class(class_name: str, fields: Dict, package_name: str = "com.
         field_type = field_info['type']
         original_name = field_info['original_name']
         
-        code += f"    @JsonProperty(access = JsonProperty.Access.{access_modifier}, value = \"{original_name}\")\n"
+        if access_modifier:
+            code += f"    @JsonProperty(access = JsonProperty.Access.{access_modifier}, value = \"{original_name}\")\n"
+        else:
+            code += f"    @JsonProperty(value = \"{original_name}\")\n"
         code += f"    private {field_type} {java_field_name};\n\n"
     
     # Generate getters and setters only if requested
@@ -165,7 +198,7 @@ def main():
     input_file = None
     output_path = "generated"
     package_name = "com.example.model"
-    access_modifier = "READ_WRITE"
+    access_modifier = None
     generate_getters = False
     generate_setters = False
     
@@ -193,7 +226,7 @@ def main():
         elif current_argument in ("-s", "--setters"):
             generate_setters = True
     
-    if access_modifier not in ["READ_ONLY", "WRITE_ONLY", "READ_WRITE", "AUTO"]:
+    if access_modifier not in ["READ_ONLY", "WRITE_ONLY", "READ_WRITE", "AUTO", None]:
         print("Error: Invalid access modifier", file=sys.stderr)
         print_help()
         sys.exit(1)
@@ -227,7 +260,7 @@ def main():
         # Generate Java classes
         generated_files = []
         for class_name, fields in classes.items():
-            java_code = generate_java_class(class_name, fields, package_name, access_modifier, generate_getters, generate_setters)
+            java_code = generate_java_class(class_name, fields, access_modifier, package_name, generate_getters, generate_setters)
             
             # Write to file
             output_file = os.path.join(output_dir, f"{class_name}.java")
@@ -252,6 +285,7 @@ def main():
 
 def print_help():
     print("JSON to Java Class Generator")
+    print("https://github.com/Kecerim24/JsonToJackson")
     print()
     print("Usage: python main.py -i <input_file> [-o <output_path>] [-p <package_name>] [-a <access_modifier>] [-g] [-s]")
     print()
@@ -260,7 +294,7 @@ def print_help():
     print("  -i, --input <file>      Input JSON file (required)")
     print("  -o, --output <path>     Output directory or file path (default: 'generated')")
     print("  -p, --package <name>    Java package name (default: 'com.example.model')")
-    print("  -a, --access <name>     Jackson access modifier (default: 'AUTO'), options: READ_ONLY, WRITE_ONLY, READ_WRITE, AUTO")
+    print("  -a, --access <name>     Jackson access modifier (options: READ_ONLY, WRITE_ONLY, READ_WRITE, AUTO)")
     print("  -g, --getters           Generate getters (default: False)")
     print("  -s, --setters           Generate setters (default: False)")
     print()

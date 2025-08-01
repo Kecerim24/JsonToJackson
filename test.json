@@ -1,6 +1,8 @@
 {
     "name": "John",
-    "birthDate": "2000-01-01",
+    "birthDate": "2016-12-13",
+    "birthTime": "21:20:37.593194",
+    "birthDateTime": "2016-12-13T21:20:37.593194+00:00",
     "isStudent": true,
     "grades": [85, 90, 78, 92],
     "address": {
