@@ -32,7 +32,7 @@ public class Test {
     private Address address;
 
     @JsonProperty(access = JsonProperty.Access.AUTO, value = "phoneNumbers")
-    private List<Phonenumber> phoneNumbers;
+    private List<PhoneNumber> phoneNumbers;
 
     public String getName() {
         return name;
@@ -42,35 +42,35 @@ public class Test {
         this.name = name;
     }
 
-    public LocalDate getBirthdate() {
+    public LocalDate getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthdate(LocalDate birthDate) {
+    public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
     }
 
-    public LocalTime getBirthtime() {
+    public LocalTime getBirthTime() {
         return birthTime;
     }
 
-    public void setBirthtime(LocalTime birthTime) {
+    public void setBirthTime(LocalTime birthTime) {
         this.birthTime = birthTime;
     }
 
-    public LocalDateTime getBirthdatetime() {
+    public LocalDateTime getBirthDateTime() {
         return birthDateTime;
     }
 
-    public void setBirthdatetime(LocalDateTime birthDateTime) {
+    public void setBirthDateTime(LocalDateTime birthDateTime) {
         this.birthDateTime = birthDateTime;
     }
 
-    public Boolean getIsstudent() {
+    public Boolean getIsStudent() {
         return isStudent;
     }
 
-    public void setIsstudent(Boolean isStudent) {
+    public void setIsStudent(Boolean isStudent) {
         this.isStudent = isStudent;
     }
 
@@ -90,11 +90,11 @@ public class Test {
         this.address = address;
     }
 
-    public List<Phonenumber> getPhonenumbers() {
+    public List<PhoneNumber> getPhoneNumbers() {
         return phoneNumbers;
     }
 
-    public void setPhonenumbers(List<Phonenumber> phoneNumbers) {
+    public void setPhoneNumbers(List<PhoneNumber> phoneNumbers) {
         this.phoneNumbers = phoneNumbers;
     }
 

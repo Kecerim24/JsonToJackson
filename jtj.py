@@ -8,12 +8,24 @@ from typing import Dict, Any, Set, List
 def to_camel_case(snake_str: str) -> str:
     """Convert snake_case to camelCase"""
     components = snake_str.split('_')
+    if len(components) == 1:
+        return components[0]
     return components[0] + ''.join(word.capitalize() for word in components[1:])
 
 def to_pascal_case(snake_str: str) -> str:
     """Convert snake_case to PascalCase"""
     components = snake_str.split('_')
+    if len(components) == 1:
+        return components[0]
     return ''.join(word.capitalize() for word in components)
+
+def is_camel_case(value: str) -> bool:
+    """Check if value is in camelCase"""
+    return value == to_camel_case(value)
+
+def is_pascal_case(value: str) -> bool:
+    """Check if value is in PascalCase"""
+    return value == to_pascal_case(value)
 
 def date_valid(value: str) -> bool:
     try:
@@ -61,14 +73,20 @@ def get_java_type(value: Any, field_name: str = "") -> str:
         first_element = value[0]
         if isinstance(first_element, dict):
             # Create class name from field name
-            class_name = to_pascal_case(field_name.rstrip('s'))  # Remove plural 's'
-            return f"List<{class_name}>"
+            class_name = field_name.rstrip('s')
+            if is_camel_case(class_name):
+                return f"List<{class_name[0].upper() + class_name[1:]}>"
+            else:
+                return f"List<{to_pascal_case(class_name)}>"
         else:
             element_type = get_java_type(first_element)
             return f"List<{element_type}>"
     elif isinstance(value, dict):
         # For nested objects, use PascalCase of field name
-        return to_pascal_case(field_name)
+        if is_camel_case(field_name):
+            return field_name[0].upper() + field_name[1:]
+        else:
+            return to_pascal_case(field_name)
     else:
         return "String"  # Fallback
 
@@ -81,6 +99,7 @@ def analyze_json_structure(data: Any, class_name: str = "Root") -> Dict[str, Dic
             classes[current_class_name] = {}
         
         for key, value in obj.items():
+            
             java_field_name = to_camel_case(key)
             java_type = get_java_type(value, key)
             
@@ -91,12 +110,19 @@ def analyze_json_structure(data: Any, class_name: str = "Root") -> Dict[str, Dic
             
             # Recursively analyze nested objects
             if isinstance(value, dict) and value:  # Non-empty dict
-                nested_class_name = to_pascal_case(key)
+                if is_camel_case(key):
+                    nested_class_name = key[0].upper() + key[1:]
+                else:
+                    nested_class_name = to_pascal_case(key)
                 analyze_object(value, nested_class_name)
             elif isinstance(value, list) and value:  # Non-empty list
                 first_element = value[0]
                 if isinstance(first_element, dict):
-                    nested_class_name = to_pascal_case(key.rstrip('s'))  # Remove plural 's'
+                    nested_class_name = key.rstrip('s') # Remove plural 's'
+                    if is_camel_case(key):
+                        nested_class_name = key[0].upper() + key[1:]
+                    else:
+                        nested_class_name = to_pascal_case(key)
                     analyze_object(first_element, nested_class_name)
                     # Analyze all elements to get complete field set
                     for item in value[1:]:
@@ -164,7 +190,7 @@ def generate_java_class(class_name: str, fields: Dict, access_modifier: str, pac
     if generate_getters or generate_setters:
         for java_field_name, field_info in fields.items():
             field_type = field_info['type']
-            capitalized_field = java_field_name.capitalize()
+            capitalized_field = java_field_name[0].upper() + java_field_name[1:]
             
             if generate_getters:
                 code += f"    public {field_type} get{capitalized_field}() {{\n"
@@ -246,7 +272,11 @@ def main():
         
         # Determine root class name from filename
         root_class_name = os.path.splitext(os.path.basename(input_file))[0]
-        root_class_name = to_pascal_case(root_class_name.replace('-', '_').replace(' ', '_'))
+        root_class_name = root_class_name.replace('-', '_').replace(' ', '_')
+        if is_camel_case(root_class_name):
+            root_class_name = root_class_name[0].upper() + root_class_name[1:]
+        else:
+            root_class_name = to_pascal_case(root_class_name)
         
         classes = analyze_json_structure(data, root_class_name)
         
